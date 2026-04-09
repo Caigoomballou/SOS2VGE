@@ -21,6 +21,16 @@ namespace SOS2VGE
 			return TryPostfixOnType("SaveOurShip2.HarmonyPatches+CanLandOnSOS2Space");
 		}
 
+		internal static MethodBase TryVfShuttleBayLandingPostfix()
+		{
+			var topLevel = TryPostfixOnType("SaveOurShip2.VFShuttleBayLanding");
+			if (topLevel != null)
+			{
+				return topLevel;
+			}
+			return TryPostfixOnType("SaveOurShip2.HarmonyPatches+VFShuttleBayLanding");
+		}
+
 		static MethodBase TryPostfixOnType(string fullName)
 		{
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -45,6 +55,24 @@ namespace SOS2VGE
 				}
 			}
 			return null;
+		}
+	}
+
+	/// <summary>
+	/// SOS2 shuttle postfix can dereference map/vehicleDef in edge targeter states.
+	/// Skip that postfix when either is null to avoid targeter lockup loops.
+	/// </summary>
+	[HarmonyPatch]
+	public static class Guard_SOS2_VFShuttleBayLanding_Postfix
+	{
+		static MethodBase TargetMethod() => Sos2HarmonyLookup.TryVfShuttleBayLandingPostfix();
+
+		static bool Prepare() => TargetMethod() != null;
+
+		[HarmonyPrefix]
+		public static bool Prefix(object vehicleDef, Map map)
+		{
+			return vehicleDef != null && map != null;
 		}
 	}
 
@@ -88,7 +116,13 @@ namespace SOS2VGE
 		[HarmonyPriority(Priority.First)]
 		public static bool Prefix(object vehicleDef, IntVec3 cell, Map map, ref bool __result)
 		{
-			if (vehicleDef == null || map == null || !cell.InBounds(map))
+			if (vehicleDef == null || map == null)
+			{
+				// Returning false here also runs SOS2 postfixes; set false so their first short-circuit exits safely.
+				__result = false;
+				return false;
+			}
+			if (!cell.InBounds(map))
 			{
 				__result = true;
 				return false;
