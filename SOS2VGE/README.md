@@ -13,7 +13,7 @@ Small compatibility patch for **Save Our Ship 2** and **Vanilla Gravship Expande
 
 ## Load order
 
-Load **after**: Harmony → Vanilla Gravship Expanded → Vehicle Framework (if present) → Save Our Ship 2 → **this mod**.
+Load **after**: Harmony → Vehicle Framework  → Vanilla Gravship Expanded → Save Our Ship 2 → **this mod**.
 
 ## Install (from GitHub)
 
