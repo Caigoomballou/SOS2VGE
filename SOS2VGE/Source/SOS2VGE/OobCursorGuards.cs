@@ -11,16 +11,6 @@ namespace SOS2VGE
 	/// </summary>
 	internal static class Sos2HarmonyLookup
 	{
-		internal static MethodBase TryCanLandOnSos2SpacePostfix()
-		{
-			var topLevel = TryPostfixOnType("SaveOurShip2.CanLandOnSOS2Space");
-			if (topLevel != null)
-			{
-				return topLevel;
-			}
-			return TryPostfixOnType("SaveOurShip2.HarmonyPatches+CanLandOnSOS2Space");
-		}
-
 		internal static MethodBase TryVfShuttleBayLandingPostfix()
 		{
 			var topLevel = TryPostfixOnType("SaveOurShip2.VFShuttleBayLanding");
@@ -73,23 +63,6 @@ namespace SOS2VGE
 		public static bool Prefix(object vehicleDef, Map map)
 		{
 			return vehicleDef != null && map != null;
-		}
-	}
-
-	/// <summary>
-	/// Gravship: SOS2's postfix uses GetTerrain before checking bounds; skip it when the cursor is off-map.
-	/// </summary>
-	[HarmonyPatch]
-	public static class Guard_CanLandOnSOS2Space_Postfix
-	{
-		static MethodBase TargetMethod() => Sos2HarmonyLookup.TryCanLandOnSos2SpacePostfix();
-
-		static bool Prepare() => TargetMethod() != null;
-
-		[HarmonyPrefix]
-		public static bool Prefix(IntVec3 cell, Map map)
-		{
-			return map != null && cell.InBounds(map);
 		}
 	}
 
